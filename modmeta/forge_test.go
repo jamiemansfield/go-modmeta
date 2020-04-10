@@ -13,7 +13,7 @@ var (
     "description": "Example Mod.",
     "version": "1.0.0",
     "url": "https://examplemod.com",
-    "authors": ["Bob", "Vance"]
+    "authorList": ["Bob", "Vance"]
   }
 ]`
 	testMcModInfoV2 = `{
@@ -24,7 +24,7 @@ var (
       "description": "Example Mod.",
       "version": "1.0.0",
       "url": "https://examplemod.com",
-      "authors": ["Bob", "Vance"]
+      "authorList": ["Bob", "Vance"]
     }
   ]
 }`
