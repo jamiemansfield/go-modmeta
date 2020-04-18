@@ -104,14 +104,22 @@ func ReadForgeModsToml(reader io.Reader) ([]*ModMetadata, error) {
 	for _, modTree := range modsTree {
 		mods = append(mods, &ModMetadata{
 			System:      "forge",
-			ID:          modTree.Get("modId").(string),
-			Name:        modTree.Get("displayName").(string),
-			Version:     modTree.Get("version").(string),
-			Description: modTree.Get("description").(string),
-			URL:         modTree.Get("displayURL").(string),
-			Authors:     modTree.Get("authors").(string),
+			ID:          getTomlString(modTree, "modId"),
+			Name:        getTomlString(modTree, "displayName"),
+			Version:     getTomlString(modTree, "version"),
+			Description: getTomlString(modTree, "description"),
+			URL:         getTomlString(modTree, "displayURL"),
+			Authors:     getTomlString(modTree, "authors"),
 		})
 	}
 
 	return mods, nil
+}
+
+func getTomlString(tree *toml.Tree, key string) string {
+	if tree.Has(key) {
+		return tree.Get(key).(string)
+	} else {
+		return ""
+	}
 }
