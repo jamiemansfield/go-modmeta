@@ -24,8 +24,5 @@ func TestReadFabricModJson(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
-	if mod.ID != "example" {
-		t.Errorf("Mod ID should be example, not %s", mod.ID)
-	}
+	testModMetadata(t, mod.ToModMetadata())
 }

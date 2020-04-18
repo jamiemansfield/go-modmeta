@@ -46,6 +46,22 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 			}
 		}
 
+		// Minecraft Forge / mods.toml
+		if file.Name == "META-INF/mods.toml" {
+			fc, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+
+			forgeMods, err := ReadForgeModsToml(fc)
+			if err != nil {
+				return nil, err
+			}
+			fc.Close()
+
+			mods = append(mods, forgeMods...)
+		}
+
 		// Fabric / fabric.mod.json
 		if file.Name == "fabric.mod.json" {
 			fc, err := file.Open()

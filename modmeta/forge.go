@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/pelletier/go-toml"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -89,4 +90,28 @@ func (m *McModInfoMetadata) ToModMetadata() *ModMetadata {
 		URL:         m.URL,
 		Authors:     strings.Join(m.Authors, ", "),
 	}
+}
+
+// Reads a mods.toml file.
+func ReadForgeModsToml(reader io.Reader) ([]*ModMetadata, error) {
+	tree, err := toml.LoadReader(reader)
+	if err != nil {
+		return nil, err
+	}
+	modsTree := tree.Get("mods").([]*toml.Tree)
+
+	var mods []*ModMetadata
+	for _, modTree := range modsTree {
+		mods = append(mods, &ModMetadata{
+			System:      "forge",
+			ID:          modTree.Get("modId").(string),
+			Name:        modTree.Get("displayName").(string),
+			Version:     modTree.Get("version").(string),
+			Description: modTree.Get("description").(string),
+			URL:         modTree.Get("displayURL").(string),
+			Authors:     modTree.Get("authors").(string),
+		})
+	}
+
+	return mods, nil
 }
