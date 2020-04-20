@@ -41,9 +41,7 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 			}
 			fc.Close()
 
-			for _, mod := range forgeMods {
-				mods = append(mods, mod.ToModMetadata())
-			}
+			mods = append(mods, forgeMods...)
 		}
 
 		// Minecraft Forge / mods.toml

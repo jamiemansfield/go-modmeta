@@ -1,9 +1,8 @@
 package modmeta
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+	"github.com/buger/jsonparser"
 	"github.com/pelletier/go-toml"
 	"io"
 	"io/ioutil"
@@ -14,82 +13,84 @@ var (
 	FailedToReadMcModInfoVersion = errors.New("forge: failed to read mcmod.info with any supported format")
 )
 
-// Represents a single mods' metadata from Minecraft Forge's
-// mcmod.info standard.
-type McModInfoMetadata struct {
-	ID string `json:"modid"`
-	Name string `json:"name"`
-	Version string `json:"version"`
-	Description string `json:"description"`
-	URL string `json:"url"`
-	Authors []string `json:"authorList"`
-}
-
-type mcModInfoMetadataV1 []*McModInfoMetadata
-type mcModInfoMetadataV2 struct {
-	Mods []*McModInfoMetadata `json:"modList"`
-}
-
-// Reads a mcmod.info file that uses the V1 specification.
-func ReadMcModInfoV1(reader io.Reader) ([]*McModInfoMetadata, error) {
-	var mods mcModInfoMetadataV1
-	err := json.NewDecoder(reader).Decode(&mods)
-	if err != nil {
-		return nil, err
-	}
-
-	return mods, nil
-}
-
-// Reads a mcmod.info file that uses the V2 specification.
-func ReadMcModInfoV2(reader io.Reader) ([]*McModInfoMetadata, error) {
-	var mods mcModInfoMetadataV2
-	err := json.NewDecoder(reader).Decode(&mods)
-	if err != nil {
-		return nil, err
-	}
-
-	return mods.Mods, nil
-}
-
 // Reads a mcmod.info file that uses either the V1 or V2 format. If
 // modmeta is unable to read in either format, FailedToReadMcModInfoVersion
-// will be returned.
-func ReadMcModInfo(reader io.Reader) ([]*McModInfoMetadata, error) {
-	// We need to copy the bytes so we can read it twice
+// will be returned. The System is set to "forge", though its worth noting
+// that other mod systems use FML's loader - for example, Sponge plugins.
+func ReadMcModInfo(reader io.Reader) ([]*ModMetadata, error) {
 	raw, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	// Try V1 format
-	mods, err := ReadMcModInfoV1(bytes.NewReader(raw))
-	if err == nil {
-		return mods, nil
+	_, jsonType, _, err := jsonparser.Get(raw)
+	if err != nil {
+		return nil, err
 	}
 
-	// Try V2 format
-	mods, err = ReadMcModInfoV2(bytes.NewReader(raw))
-	if err == nil {
-		return mods, nil
+	var listRaw []byte
+
+	// V1 Format
+	if jsonType == jsonparser.Array {
+		listRaw = raw
+	} else
+	// V2 Format
+	if jsonType == jsonparser.Object {
+		modsList, dataType, _, err := jsonparser.Get(raw, "modList")
+		if err != nil {
+			return nil, err
+		}
+		if dataType != jsonparser.Array {
+			return nil, FailedToReadMcModInfoVersion
+		}
+		listRaw = modsList
+	} else {
+		return nil, FailedToReadMcModInfoVersion
 	}
 
-	return nil, FailedToReadMcModInfoVersion
+	var mods []*ModMetadata
+	for _, mod := range getJsonArray(listRaw) {
+		mods = append(mods, &ModMetadata{
+			System:      "forge",
+			ID:          getJsonString(mod, "modid"),
+			Name:        getJsonString(mod, "name"),
+			Version:     getJsonString(mod, "version"),
+			Description: getJsonString(mod, "description"),
+			URL:         getJsonString(mod, "url"),
+			Authors:     strings.Join(getJsonStringArray(mod, "authorList"), ", "),
+		})
+	}
+
+	return mods, nil
 }
 
-// Creates a ModMetadata for the mcmod.info metadata. The System
-// is set to "forge", though its worth noting that other mod
-// systems use FML's loader - for example, Sponge plugins.
-func (m *McModInfoMetadata) ToModMetadata() *ModMetadata {
-	return &ModMetadata{
-		System:      "forge",
-		ID:          m.ID,
-		Name:        m.Name,
-		Version:     m.Version,
-		Description: m.Description,
-		URL:         m.URL,
-		Authors:     strings.Join(m.Authors, ", "),
+func getJsonString(raw []byte, key string) string {
+	value, err := jsonparser.GetString(raw, key)
+	if err != nil {
+		return ""
 	}
+	return value
+}
+
+func getJsonArray(raw []byte, key... string) [][]byte {
+	var values [][]byte
+
+	arrayRaw, _, _, err := jsonparser.Get(raw, key...)
+	if err == nil {
+		_, _ = jsonparser.ArrayEach(arrayRaw, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+			values = append(values, value)
+		})
+	}
+
+	return values
+}
+
+func getJsonStringArray(raw []byte, key... string) []string {
+	var values []string
+	for _, value := range getJsonArray(raw, key...) {
+		values = append(values, string(value))
+	}
+	return values
 }
 
 // Reads a mods.toml file.

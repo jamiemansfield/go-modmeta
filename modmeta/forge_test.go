@@ -28,6 +28,14 @@ var (
     }
   ]
 }`
+	testBadButValidMcModInfo = `{
+  "modList": [
+    {
+      "description": "Example
+ Mod."
+    }
+  ]
+}`
 	testModsToml = `modLoader="javaFml"
 [[mods]]
 	modId = "example"
@@ -38,34 +46,6 @@ var (
 	displayURL = "https://examplemod.com"
 `
 )
-
-func TestReadMcModInfoV1(t *testing.T) {
-	mods, err := ReadMcModInfoV1(strings.NewReader(testMcModInfoV1))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if len(mods) != 1 {
-		t.Errorf("There should be 1 mod not %d", len(mods))
-		return
-	}
-	testModMetadata(t, mods[0].ToModMetadata())
-}
-
-func TestReadMcModInfoV2(t *testing.T) {
-	mods, err := ReadMcModInfoV2(strings.NewReader(testMcModInfoV2))
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if len(mods) != 1 {
-		t.Errorf("There should be 1 mod not %d", len(mods))
-		return
-	}
-	testModMetadata(t, mods[0].ToModMetadata())
-}
 
 func TestReadMcModInfo_V1(t *testing.T) {
 	mods, err := ReadMcModInfo(strings.NewReader(testMcModInfoV1))
@@ -78,7 +58,7 @@ func TestReadMcModInfo_V1(t *testing.T) {
 		t.Errorf("There should be 1 mod not %d", len(mods))
 		return
 	}
-	testModMetadata(t, mods[0].ToModMetadata())
+	testModMetadata(t, mods[0])
 }
 
 func TestReadMcModInfo_V2(t *testing.T) {
@@ -92,7 +72,24 @@ func TestReadMcModInfo_V2(t *testing.T) {
 		t.Errorf("There should be 1 mod not %d", len(mods))
 		return
 	}
-	testModMetadata(t, mods[0].ToModMetadata())
+	testModMetadata(t, mods[0])
+}
+
+func TestReadMcModInfo_BadButValid(t *testing.T) {
+	mods, err := ReadMcModInfo(strings.NewReader(testBadButValidMcModInfo))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if len(mods) != 1 {
+		t.Errorf("There should be 1 mod not %d", len(mods))
+		return
+	}
+
+	if mods[0].Description != "Example\n Mod." {
+		t.Errorf("Failed to read multi-line string!")
+	}
 }
 
 func TestReadForgeModsToml(t *testing.T) {
