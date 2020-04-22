@@ -2,7 +2,9 @@
 // from mod binaries.
 package modmeta
 
-import "archive/zip"
+import (
+	"archive/zip"
+)
 
 // Represents a single mod's metadata.
 type ModMetadata struct {
@@ -25,6 +27,24 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 		return nil, err
 	}
 	defer reader.Close()
+
+	// Find MANIFEST first
+	var manifest map[string]string
+	for _, file := range reader.File {
+		if file.Name != "META-INF/MANIFEST.MF" {
+			continue
+		}
+		fc, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+
+		m, err := ReadJarManifest(fc)
+		if err != nil {
+			return nil, err
+		}
+		manifest = m
+	}
 
 	var mods []*ModMetadata
 	for _, file := range reader.File {
@@ -56,6 +76,21 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 				return nil, err
 			}
 			fc.Close()
+
+			// Minecraft Forge supports substitutions in mods.toml files,
+			// with data populated from the Jar's MANIFEST.
+			// Substitutions are in the form ${file.KEY}.
+			for _, mod := range forgeMods {
+				if mod.Version == "${file.jarVersion}" {
+					manifestVersion := manifest["IMPLEMENTATION-VERSION"]
+					if manifestVersion == "" {
+						// This matches Minecraft Forge's behaviour
+						manifestVersion = "NONE"
+					}
+
+					mod.Version = manifestVersion
+				}
+			}
 
 			mods = append(mods, forgeMods...)
 		}
