@@ -82,7 +82,7 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 			// Substitutions are in the form ${file.KEY}.
 			for _, mod := range forgeMods {
 				if mod.Version == "${file.jarVersion}" {
-					manifestVersion := manifest["IMPLEMENTATION-VERSION"]
+					manifestVersion := manifest["Implementation-Version"]
 					if manifestVersion == "" {
 						// This matches Minecraft Forge's behaviour
 						manifestVersion = "NONE"
