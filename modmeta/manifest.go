@@ -23,6 +23,11 @@ func ReadJarManifest(r io.Reader) (map[string]string, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
+		// Ignore empty lines
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+
 		delimeter := strings.Index(line, ":")
 		if delimeter == -1 {
 			return nil, fmt.Errorf("manifest: faulty line '%s' %w", line, FaultyManifest)

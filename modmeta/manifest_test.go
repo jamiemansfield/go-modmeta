@@ -8,6 +8,7 @@ import (
 const (
 	testManifest = `Manifest-Version: 1.0
 Implementation-Title: Example Artifact
+
 Implementation-Version: 1.0.0
 `
 )
