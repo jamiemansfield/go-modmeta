@@ -2,14 +2,9 @@ package modmeta
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"strings"
-)
-
-var (
-	FaultyManifest = errors.New("faulty manifest provided")
 )
 
 // ReadJarManifest takes a reader for a Jar file's manifest
@@ -20,22 +15,36 @@ func ReadJarManifest(r io.Reader) (map[string]string, error) {
 	manifest := map[string]string{}
 
 	scanner := bufio.NewScanner(r)
+	lineNum := 0
+	var lastName string
 	for scanner.Scan() {
 		line := scanner.Text()
+		lineNum++
 
 		// Ignore empty lines
-		if strings.TrimSpace(line) == "" {
+		if len(line) == 0 {
+			lastName = ""
+			continue
+		}
+
+		// Continuation line
+		if strings.HasPrefix(line, " ") {
+			if lastName == "" {
+				return nil, fmt.Errorf("manifest[%d]: faulty line '%s'", lineNum, line)
+			}
+			manifest[lastName] += line[1:]
 			continue
 		}
 
 		delimeter := strings.Index(line, ":")
 		if delimeter == -1 {
-			return nil, fmt.Errorf("manifest: faulty line '%s' %w", line, FaultyManifest)
+			return nil, fmt.Errorf("manifest: faulty line '%s'", line)
 		}
 
 		key := strings.TrimSpace(line[:delimeter])
 		value := strings.TrimSpace(line[delimeter+1:])
 
+		lastName = key
 		manifest[key] = value
 	}
 

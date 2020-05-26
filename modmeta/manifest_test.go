@@ -7,9 +7,12 @@ import (
 
 const (
 	testManifest = `Manifest-Version: 1.0
-Implementation-Title: Example Artifact
 
+Implementation-Title: Example Artifact
 Implementation-Version: 1.0.0
+
+Multiline: this is a multiline
+  value
 `
 )
 
@@ -30,6 +33,10 @@ func TestReadJarManifest(t *testing.T) {
 	}
 	if manifest["Implementation-Version"] != "1.0.0" {
 		t.Errorf("Implementation-Version should equal '1.0.0', not '%s'.", manifest["Implementation-Version"])
+		return
+	}
+	if manifest["Multiline"] != "this is a multiline value" {
+		t.Errorf("Multiline should equal 'this is a multiline value', not '%s'.", manifest["Multiline"])
 		return
 	}
 }
