@@ -110,6 +110,22 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 
 			mods = append(mods, fabricMod.ToModMetadata())
 		}
+
+		// LiteLoader / litemod.json
+		if file.Name == "litemod.json" {
+			fc, err := file.Open()
+			if err != nil {
+				return nil, err
+			}
+
+			liteMod, err := ReadLiteModJson(fc)
+			if err != nil {
+				return nil, err
+			}
+			fc.Close()
+
+			mods = append(mods, liteMod.ToModMetadata())
+		}
 	}
 
 	return mods, nil
