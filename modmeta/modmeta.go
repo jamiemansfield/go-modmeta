@@ -4,6 +4,8 @@ package modmeta
 
 import (
 	"archive/zip"
+
+	"git.sr.ht/~jmansfield/go-javamanifest/javamanifest"
 )
 
 // Represents a single mod's metadata.
@@ -29,7 +31,7 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 	defer reader.Close()
 
 	// Find MANIFEST first
-	var manifest map[string]string
+	manifest := javamanifest.NewManifest()
 	for _, file := range reader.File {
 		if file.Name != "META-INF/MANIFEST.MF" {
 			continue
@@ -39,11 +41,9 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 			return nil, err
 		}
 
-		m, err := ReadJarManifest(fc)
-		if err != nil {
+		if err := manifest.Read(fc); err != nil {
 			return nil, err
 		}
-		manifest = m
 	}
 
 	var mods []*ModMetadata
@@ -82,7 +82,7 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 			// Substitutions are in the form ${file.KEY}.
 			for _, mod := range forgeMods {
 				if mod.Version == "${file.jarVersion}" {
-					manifestVersion := manifest["Implementation-Version"]
+					manifestVersion := manifest.Main["Implementation-Version"]
 					if manifestVersion == "" {
 						// This matches Minecraft Forge's behaviour
 						manifestVersion = "NONE"

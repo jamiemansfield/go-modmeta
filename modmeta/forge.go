@@ -2,11 +2,12 @@ package modmeta
 
 import (
 	"errors"
-	"github.com/buger/jsonparser"
-	"github.com/pelletier/go-toml"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"github.com/buger/jsonparser"
+	"github.com/pelletier/go-toml"
 )
 
 var (
@@ -72,7 +73,7 @@ func getJsonString(raw []byte, key string) string {
 	return value
 }
 
-func getJsonArray(raw []byte, key... string) [][]byte {
+func getJsonArray(raw []byte, key ...string) [][]byte {
 	var values [][]byte
 
 	arrayRaw, _, _, err := jsonparser.Get(raw, key...)
@@ -85,7 +86,7 @@ func getJsonArray(raw []byte, key... string) [][]byte {
 	return values
 }
 
-func getJsonStringArray(raw []byte, key... string) []string {
+func getJsonStringArray(raw []byte, key ...string) []string {
 	var values []string
 	for _, value := range getJsonArray(raw, key...) {
 		values = append(values, string(value))
