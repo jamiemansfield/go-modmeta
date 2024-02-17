@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020-2021, Jamie Mansfield <jmansfield@cadixdev.org>
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 // Package modmeta provides functionality to get mod metadata
 // from mod binaries.
 package modmeta

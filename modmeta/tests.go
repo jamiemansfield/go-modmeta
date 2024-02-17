@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020, Jamie Mansfield <jmansfield@cadixdev.org>
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ */
+
 package modmeta
 
 import "testing"

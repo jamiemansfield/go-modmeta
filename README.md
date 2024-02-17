@@ -27,9 +27,9 @@ file.
 mods, err := modmeta.FindMetadata("example.jar")
 ```
 
-## License
+## Licence
 
-This library is distributed under the MIT license, found in the [LICENSE.txt]
-file.
+This library is distributed under the BSD 2-Clause Licence, found in the
+[LICENSE.txt] file.
 
 [LICENSE.txt]: ./LICENSE.txt
