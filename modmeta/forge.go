@@ -20,8 +20,8 @@ var (
 	FailedToReadMcModInfoVersion = errors.New("forge: failed to read mcmod.info with any supported format")
 )
 
-// Reads a mcmod.info file that uses either the V1 or V2 format. If
-// modmeta is unable to read in either format, FailedToReadMcModInfoVersion
+// ReadMcModInfo reads a mcmod.info file that uses either the V1 or V2 format.
+// If modmeta is unable to read in either format, FailedToReadMcModInfoVersion
 // will be returned. The System is set to "forge", though its worth noting
 // that other mod systems use FML's loader - for example, Sponge plugins.
 func ReadMcModInfo(reader io.Reader) ([]*ModMetadata, error) {
@@ -100,7 +100,7 @@ func getJsonStringArray(raw []byte, key ...string) []string {
 	return values
 }
 
-// Reads a mods.toml file.
+// ReadForgeModsToml reads a mods.toml file.
 func ReadForgeModsToml(reader io.Reader) ([]*ModMetadata, error) {
 	tree, err := toml.LoadReader(reader)
 	if err != nil {

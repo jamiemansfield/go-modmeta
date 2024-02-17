@@ -14,7 +14,7 @@ import (
 	"git.sr.ht/~jmansfield/go-javamanifest/javamanifest"
 )
 
-// Represents a single mod's metadata.
+// ModMetadata represents a single mod's metadata.
 type ModMetadata struct {
 	// The mod system/loader the mods uses.
 	System string

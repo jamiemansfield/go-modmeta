@@ -12,8 +12,8 @@ import (
 	"strings"
 )
 
-// Represents a single mods' metadata from Fabric's fabric.mod.json
-// standard.
+// FabricModJsonMetadata represents a single mods' metadata from Fabric's
+// fabric.mod.json standard.
 type FabricModJsonMetadata struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
@@ -25,7 +25,7 @@ type FabricModJsonMetadata struct {
 	} `json:"contact"`
 }
 
-// Reads a fabric.mod.json file.
+// ReadFabricModJson rads a fabric.mod.json file.
 func ReadFabricModJson(reader io.Reader) (*FabricModJsonMetadata, error) {
 	var mod FabricModJsonMetadata
 	err := json.NewDecoder(reader).Decode(&mod)
@@ -36,8 +36,8 @@ func ReadFabricModJson(reader io.Reader) (*FabricModJsonMetadata, error) {
 	return &mod, nil
 }
 
-// Creates a ModMetadata for the fabric.mod.json metadata. The
-// System will be set to "fabric".
+// ToModMetadata creates a ModMetadata for the fabric.mod.json metadata.
+// The System will be set to "fabric".
 func (m *FabricModJsonMetadata) ToModMetadata() *ModMetadata {
 	return &ModMetadata{
 		System:      "fabric",

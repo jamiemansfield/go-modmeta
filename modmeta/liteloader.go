@@ -11,8 +11,8 @@ import (
 	"io"
 )
 
-// Represents a single mods' metadata from LiteLoaders's litemod.json
-// standard.
+// LiteModMetadata represents a single mods' metadata from LiteLoaders's
+// litemod.json standard.
 type LiteModMetadata struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"displayName"`
@@ -23,7 +23,7 @@ type LiteModMetadata struct {
 	URL         string `json:"url"`
 }
 
-// Reads a litemod.json file.
+// ReadLiteModJson reads a litemod.json file.
 func ReadLiteModJson(reader io.Reader) (*LiteModMetadata, error) {
 	var mod LiteModMetadata
 	err := json.NewDecoder(reader).Decode(&mod)
@@ -34,8 +34,8 @@ func ReadLiteModJson(reader io.Reader) (*LiteModMetadata, error) {
 	return &mod, nil
 }
 
-// Creates a ModMetadata for the litemod.json metadata. The System will
-// be set to "liteloader".
+// ToModMetadata creates a ModMetadata for the litemod.json metadata.
+// The System will be set to "liteloader".
 func (m *LiteModMetadata) ToModMetadata() *ModMetadata {
 	return &ModMetadata{
 		System: "liteloader",
