@@ -13,12 +13,12 @@ type ModMetadata struct {
 	// The mod system/loader the mods uses.
 	System string
 
-	ID string
-	Name string
-	Version string
+	ID          string
+	Name        string
+	Version     string
 	Description string
-	URL string
-	Authors string
+	URL         string
+	Authors     string
 }
 
 // FindMetadata attempts to find mod information from a Java binary,

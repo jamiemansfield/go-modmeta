@@ -9,12 +9,12 @@ import (
 // Represents a single mods' metadata from Fabric's fabric.mod.json
 // standard.
 type FabricModJsonMetadata struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	Version string `json:"version"`
-	Description string `json:"description"`
-	Authors []string `json:"authors"`
-	Contact struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Version     string   `json:"version"`
+	Description string   `json:"description"`
+	Authors     []string `json:"authors"`
+	Contact     struct {
 		Homepage string `json:"homepage"`
 	} `json:"contact"`
 }

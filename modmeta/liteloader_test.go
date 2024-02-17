@@ -25,4 +25,3 @@ func TestReadLiteModJson(t *testing.T) {
 	}
 	testModMetadata(t, mod.ToModMetadata())
 }
-
