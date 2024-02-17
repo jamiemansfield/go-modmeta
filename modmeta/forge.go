@@ -9,7 +9,6 @@ package modmeta
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"github.com/buger/jsonparser"
@@ -25,7 +24,7 @@ var (
 // will be returned. The System is set to "forge", though its worth noting
 // that other mod systems use FML's loader - for example, Sponge plugins.
 func ReadMcModInfo(reader io.Reader) ([]*ModMetadata, error) {
-	raw, err := ioutil.ReadAll(reader)
+	raw, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
