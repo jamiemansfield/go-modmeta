@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Jamie Mansfield <jmansfield@cadixdev.org>
+ * Copyright (c) 2020-2024, Jamie Mansfield <jmansfield@cadixdev.org>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
@@ -10,9 +10,31 @@ package modmeta
 
 import (
 	"archive/zip"
+	"errors"
+	"fmt"
+	"io/fs"
 
 	"git.sr.ht/~jmansfield/go-javamanifest/javamanifest"
 )
+
+var providers = make(map[string]ProviderFunction)
+
+// ProviderFunction scans for mods within a given ZIP archive (likely
+// to be a Java archive).
+type ProviderFunction func(reader *zip.Reader, manifest *javamanifest.Manifest) ([]*ModMetadata, error)
+
+// RegisterProvider registers a mod metadata provider, that is able to
+// scan ZIP archives for mods.
+func RegisterProvider(name string, f ProviderFunction) {
+	if f == nil {
+		panic(fmt.Errorf("modmeta: provider is nil"))
+	}
+	if _, ok := providers[name]; ok {
+		panic(fmt.Errorf("modmeta: duplicate provider for %s", name))
+	}
+
+	providers[name] = f
+}
 
 // ModMetadata represents a single mod's metadata.
 type ModMetadata struct {
@@ -38,100 +60,28 @@ func FindMetadata(archive string) ([]*ModMetadata, error) {
 
 	// Find MANIFEST first
 	manifest := javamanifest.NewManifest()
-	for _, file := range reader.File {
-		if file.Name != "META-INF/MANIFEST.MF" {
-			continue
-		}
-		fc, err := file.Open()
-		if err != nil {
-			return nil, err
-		}
 
-		if err := manifest.Read(fc); err != nil {
+	{
+		file, err := reader.Open("META-INF/MANIFEST.MF")
+		if err == nil {
+			defer file.Close()
+
+			if err := manifest.Read(file); err != nil {
+				return nil, err
+			}
+		} else if !errors.Is(err, fs.ErrNotExist) {
 			return nil, err
 		}
 	}
 
 	var mods []*ModMetadata
-	for _, file := range reader.File {
-		// Minecraft Forge / mcmod.info
-		if file.Name == "mcmod.info" {
-			fc, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
 
-			forgeMods, err := ReadMcModInfo(fc)
-			if err != nil {
-				return nil, err
-			}
-			fc.Close()
-
-			mods = append(mods, forgeMods...)
+	for _, function := range providers {
+		provided, err := function(&reader.Reader, manifest)
+		if err != nil {
+			return nil, err
 		}
-
-		// Minecraft Forge / mods.toml
-		if file.Name == "META-INF/mods.toml" {
-			fc, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
-
-			forgeMods, err := ReadForgeModsToml(fc)
-			if err != nil {
-				return nil, err
-			}
-			fc.Close()
-
-			// Minecraft Forge supports substitutions in mods.toml files,
-			// with data populated from the Jar's MANIFEST.
-			// Substitutions are in the form ${file.KEY}.
-			for _, mod := range forgeMods {
-				if mod.Version == "${file.jarVersion}" {
-					manifestVersion := manifest.Main["Implementation-Version"]
-					if manifestVersion == "" {
-						// This matches Minecraft Forge's behaviour
-						manifestVersion = "NONE"
-					}
-
-					mod.Version = manifestVersion
-				}
-			}
-
-			mods = append(mods, forgeMods...)
-		}
-
-		// Fabric / fabric.mod.json
-		if file.Name == "fabric.mod.json" {
-			fc, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
-
-			fabricMod, err := ReadFabricModJson(fc)
-			if err != nil {
-				return nil, err
-			}
-			fc.Close()
-
-			mods = append(mods, fabricMod.ToModMetadata())
-		}
-
-		// LiteLoader / litemod.json
-		if file.Name == "litemod.json" {
-			fc, err := file.Open()
-			if err != nil {
-				return nil, err
-			}
-
-			liteMod, err := ReadLiteModJson(fc)
-			if err != nil {
-				return nil, err
-			}
-			fc.Close()
-
-			mods = append(mods, liteMod.ToModMetadata())
-		}
+		mods = append(mods, provided...)
 	}
 
 	return mods, nil

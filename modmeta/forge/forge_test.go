@@ -1,14 +1,16 @@
 /*
- * Copyright (c) 2020, Jamie Mansfield <jmansfield@cadixdev.org>
+ * Copyright (c) 2020-2024, Jamie Mansfield <jmansfield@cadixdev.org>
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-package modmeta
+package forge
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/jamiemansfield/go-modmeta/modmeta"
 )
 
 var (
@@ -19,7 +21,7 @@ var (
     "description": "Example Mod.",
     "version": "1.0.0",
     "url": "https://examplemod.com",
-    "authorList": ["Bob", "Vance"]
+    "authorList": ["Example Author"]
   }
 ]`
 	testMcModInfoV2 = `{
@@ -30,7 +32,7 @@ var (
       "description": "Example Mod.",
       "version": "1.0.0",
       "url": "https://examplemod.com",
-      "authorList": ["Bob", "Vance"]
+      "authorList": ["Example Author"]
     }
   ]
 }`
@@ -47,7 +49,7 @@ var (
 	modId = "example"
 	version = "1.0.0"
 	displayName = "Example Mod"
-	authors = "Bob, Vance"
+	authors = "Example Author"
 	description = "Example Mod."
 	displayURL = "https://examplemod.com"
 `
@@ -110,4 +112,25 @@ func TestReadForgeModsToml(t *testing.T) {
 		return
 	}
 	testModMetadata(t, mods[0])
+}
+
+func testModMetadata(t *testing.T, mod *modmeta.ModMetadata) {
+	if mod.ID != "example" {
+		t.Errorf("Mod ID should be example, not %s", mod.ID)
+	}
+	if mod.Name != "Example Mod" {
+		t.Errorf("Mod name should be 'Example Mod', not '%s'", mod.Name)
+	}
+	if mod.Version != "1.0.0" {
+		t.Errorf("Mod version should be '1.0.0', not '%s'", mod.Version)
+	}
+	if mod.Description != "Example Mod." {
+		t.Errorf("Mod description should be 'Example Mod.', not '%s'", mod.Description)
+	}
+	if mod.URL != "https://examplemod.com" {
+		t.Errorf("Mod website should be 'https://examplemod.com', not '%s'", mod.URL)
+	}
+	if mod.Authors != "Example Author" {
+		t.Errorf("Mod authors should be 'Example Author', not '%s'", mod.Authors)
+	}
 }

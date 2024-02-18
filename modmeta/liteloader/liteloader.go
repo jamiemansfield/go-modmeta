@@ -4,16 +4,18 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-package modmeta
+package liteloader
 
 import (
 	"encoding/json"
 	"io"
+
+	"github.com/jamiemansfield/go-modmeta/modmeta"
 )
 
-// LiteModMetadata represents a single mods' metadata from LiteLoaders's
+// ModMetadata represents a single mods' metadata from LiteLoader's
 // litemod.json standard.
-type LiteModMetadata struct {
+type ModMetadata struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"displayName"`
 	Version     string `json:"version"`
@@ -24,8 +26,8 @@ type LiteModMetadata struct {
 }
 
 // ReadLiteModJson reads a litemod.json file.
-func ReadLiteModJson(reader io.Reader) (*LiteModMetadata, error) {
-	var mod LiteModMetadata
+func ReadLiteModJson(reader io.Reader) (*ModMetadata, error) {
+	var mod ModMetadata
 	err := json.NewDecoder(reader).Decode(&mod)
 	if err != nil {
 		return nil, err
@@ -36,8 +38,8 @@ func ReadLiteModJson(reader io.Reader) (*LiteModMetadata, error) {
 
 // ToModMetadata creates a ModMetadata for the litemod.json metadata.
 // The System will be set to "liteloader".
-func (m *LiteModMetadata) ToModMetadata() *ModMetadata {
-	return &ModMetadata{
+func (m *ModMetadata) ToModMetadata() *modmeta.ModMetadata {
+	return &modmeta.ModMetadata{
 		System: "liteloader",
 		ID:     m.Name,
 		// See http://develop.liteloader.com/liteloader/LiteLoader/blob/master/src/main/java/com/mumfrey/liteloader/core/api/LoadableModFile.java#L182

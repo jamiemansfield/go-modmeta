@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-package modmeta
+package forge
 
 import (
 	"errors"
@@ -13,6 +13,8 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/pelletier/go-toml"
+
+	"github.com/jamiemansfield/go-modmeta/modmeta"
 )
 
 var (
@@ -23,7 +25,7 @@ var (
 // If modmeta is unable to read in either format, FailedToReadMcModInfoVersion
 // will be returned. The System is set to "forge", though its worth noting
 // that other mod systems use FML's loader - for example, Sponge plugins.
-func ReadMcModInfo(reader io.Reader) ([]*ModMetadata, error) {
+func ReadMcModInfo(reader io.Reader) ([]*modmeta.ModMetadata, error) {
 	raw, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -54,9 +56,9 @@ func ReadMcModInfo(reader io.Reader) ([]*ModMetadata, error) {
 		return nil, FailedToReadMcModInfoVersion
 	}
 
-	var mods []*ModMetadata
+	var mods []*modmeta.ModMetadata
 	for _, mod := range getJsonArray(listRaw) {
-		mods = append(mods, &ModMetadata{
+		mods = append(mods, &modmeta.ModMetadata{
 			System:      "forge",
 			ID:          getJsonString(mod, "modid"),
 			Name:        getJsonString(mod, "name"),
@@ -100,16 +102,16 @@ func getJsonStringArray(raw []byte, key ...string) []string {
 }
 
 // ReadForgeModsToml reads a mods.toml file.
-func ReadForgeModsToml(reader io.Reader) ([]*ModMetadata, error) {
+func ReadForgeModsToml(reader io.Reader) ([]*modmeta.ModMetadata, error) {
 	tree, err := toml.LoadReader(reader)
 	if err != nil {
 		return nil, err
 	}
 	modsTree := tree.Get("mods").([]*toml.Tree)
 
-	var mods []*ModMetadata
+	var mods []*modmeta.ModMetadata
 	for _, modTree := range modsTree {
-		mods = append(mods, &ModMetadata{
+		mods = append(mods, &modmeta.ModMetadata{
 			System:      "forge",
 			ID:          getTomlString(modTree, "modId"),
 			Name:        getTomlString(modTree, "displayName"),

@@ -4,17 +4,19 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-package modmeta
+package fabric
 
 import (
 	"encoding/json"
 	"io"
 	"strings"
+
+	"github.com/jamiemansfield/go-modmeta/modmeta"
 )
 
-// FabricModJsonMetadata represents a single mods' metadata from Fabric's
+// ModMetadata represents a single mods' metadata from Fabric's
 // fabric.mod.json standard.
-type FabricModJsonMetadata struct {
+type ModMetadata struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Version     string   `json:"version"`
@@ -26,8 +28,8 @@ type FabricModJsonMetadata struct {
 }
 
 // ReadFabricModJson rads a fabric.mod.json file.
-func ReadFabricModJson(reader io.Reader) (*FabricModJsonMetadata, error) {
-	var mod FabricModJsonMetadata
+func ReadFabricModJson(reader io.Reader) (*ModMetadata, error) {
+	var mod ModMetadata
 	err := json.NewDecoder(reader).Decode(&mod)
 	if err != nil {
 		return nil, err
@@ -38,8 +40,8 @@ func ReadFabricModJson(reader io.Reader) (*FabricModJsonMetadata, error) {
 
 // ToModMetadata creates a ModMetadata for the fabric.mod.json metadata.
 // The System will be set to "fabric".
-func (m *FabricModJsonMetadata) ToModMetadata() *ModMetadata {
-	return &ModMetadata{
+func (m *ModMetadata) ToModMetadata() *modmeta.ModMetadata {
+	return &modmeta.ModMetadata{
 		System:      "fabric",
 		ID:          m.ID,
 		Name:        m.Name,
