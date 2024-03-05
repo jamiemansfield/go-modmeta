@@ -13,6 +13,7 @@ go-modmeta will search jars for mods from each supported mod system.
 - Minecraft Forge (`mcmod.info` and `mods.toml`), identified as `forge`
 - Fabric (`fabric.mod.json`), identified as `fabric`
 - LiteLoader (`litemod.json`), identified as `liteloader`
+- Canary (`Canary.inf`), identified as `canary`
 
 ## Usage
 
