@@ -95,3 +95,16 @@ func (p *Properties) GetBoolOrDefault(key string, def bool) bool {
 	}
 	return ParseBool(value)
 }
+
+func (p *Properties) GetStringArrayOrDefault(key string, delimiter string, def []string) []string {
+	value, ok := p.Props[key]
+	if !ok {
+		return def
+	}
+
+	arr := strings.Split(value, delimiter)
+	for i := range arr {
+		arr[i] = strings.TrimSpace(arr[i])
+	}
+	return arr
+}

@@ -8,7 +8,6 @@ package canary
 
 import (
 	"io"
-	"strings"
 
 	"github.com/jamiemansfield/go-modmeta/modmeta"
 	"github.com/jamiemansfield/go-modmeta/modmeta/canary/viutils"
@@ -47,6 +46,6 @@ func ReadCanaryInf(reader io.Reader) (*PluginDescriptor, error) {
 		Author:       props.GetOrDefault("author", "UNKNOWN"),
 		Language:     props.GetOrDefault("language", "java"),
 		EnableEarly:  props.GetBoolOrDefault("enable-early", false),
-		Dependencies: strings.Split(props.GetOrDefault("dependencies", ""), ","),
+		Dependencies: props.GetStringArrayOrDefault("dependencies", ",", []string{}),
 	}, nil
 }
