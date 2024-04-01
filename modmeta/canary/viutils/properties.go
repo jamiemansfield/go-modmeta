@@ -87,3 +87,11 @@ func (p *Properties) GetOrDefault(key string, def string) string {
 	}
 	return value
 }
+
+func (p *Properties) GetBoolOrDefault(key string, def bool) bool {
+	value, ok := p.Props[key]
+	if !ok {
+		return def
+	}
+	return ParseBool(value)
+}

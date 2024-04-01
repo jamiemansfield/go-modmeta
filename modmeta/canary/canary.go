@@ -8,7 +8,6 @@ package canary
 
 import (
 	"io"
-	"strconv"
 	"strings"
 
 	"github.com/jamiemansfield/go-modmeta/modmeta"
@@ -42,17 +41,12 @@ func ReadCanaryInf(reader io.Reader) (*PluginDescriptor, error) {
 		return nil, err
 	}
 
-	var enableEarly = false
-	if v, err := strconv.ParseBool(""); err != nil {
-		enableEarly = v
-	}
-
 	return &PluginDescriptor{
 		Name:         props.GetOrDefault("name", props.GetOrDefault("main-class", "")),
 		Version:      props.GetOrDefault("version", "UNKNOWN"),
 		Author:       props.GetOrDefault("author", "UNKNOWN"),
 		Language:     props.GetOrDefault("language", "java"),
-		EnableEarly:  enableEarly,
+		EnableEarly:  props.GetBoolOrDefault("enable-early", false),
 		Dependencies: strings.Split(props.GetOrDefault("dependencies", ""), ","),
 	}, nil
 }
